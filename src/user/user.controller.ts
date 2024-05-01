@@ -7,12 +7,5 @@ import { ApiCreatedResponse, ApiBadRequestResponse, ApiOperation } from '@nestjs
 export class UserController {
     constructor (private readonly userService: UserService) {}
 
-    @ApiCreatedResponse({ description: 'The user has been successfully created.' })
-    @ApiBadRequestResponse({ description: 'Bad request.' })
-    @Post('create')
-    @ApiOperation({ summary: 'Create a new user' })
-    createUser(@Body() createUserDto: CreateUserDto) {
-        return this.userService.createUser(createUserDto);
-    }
 
 }

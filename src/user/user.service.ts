@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './entities/user.entity';
+import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+import { EmailAlreadyExistsException, UsernameAlreadyExistsException } from 'libs/errors/duplicated-user.error';
 
 @Injectable()
 export class UserService {
@@ -11,15 +12,15 @@ export class UserService {
     ) {}
 
     async findOneByEmail(email: string): Promise<User> {
-        return await this.userModel.findOne({ email });
+        return await this.userModel.findOne({ email }).lean();
     }
 
     async findOneById(id: string): Promise<User> {
-        return await this.userModel.findById(id);
+        return await this.userModel.findById(id).lean();
     }
 
     async getUserByUsername(username: string): Promise<User> {
-        return await this.userModel.findOne({ username });
+        return await this.userModel.findOne({ username }).lean();
     }
 
     async createUser(createUser: CreateUserDto): Promise<User> {
@@ -36,15 +37,15 @@ export class UserService {
         if (!/[a-z]/.test(password)) {
             throw new Error('Password must contain at least one lowercase letter');
         }
-        if (!/\d/.test(password)) {
-            throw new Error('Password must contain at least one number');
-        }
-        if (!/[!@#$%^&*]/.test(password)) {
-            throw new Error('Password must contain at least one special character');
-        }
         try {
-            return await this.userModel.create({ username, email, password });
+            const user = new this.userModel({ username, email, password });
+            return (await user.save()).toJSON();
         } catch (error) {
+            if (error?.code === 11000 && error?.keyPattern?.username === 1)
+                throw new UsernameAlreadyExistsException(createUser?.username);
+
+            if (error?.code === 11000 && error?.keyPattern?.email === 1)
+                throw new EmailAlreadyExistsException(createUser.email);
             console.log(error);
         }
     }
