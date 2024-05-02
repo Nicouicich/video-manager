@@ -7,29 +7,36 @@ import { User } from 'src/user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { generateRandomPassword } from 'utils/pass-random';
 import { UserDto } from 'src/user/dto/user.dto';
-
+import { Request } from 'express';
 @Injectable()
 export class AuthService {
     constructor (
         private readonly userService: UserService,
-        private jwtService: JwtService
+        private readonly jwtService: JwtService
     ) {}
 
-    async validateUser({ username, password }: AuthPayloadDto) {
-        const user = await this.userService.getUserByUsername(username);
+    async validateUser({ username, password }: AuthPayloadDto): Promise<UserDto> {
+        const user: User = await this.userService.getUserByUsername(username);
         if (!user) return null;
 
-        if (user && (await bcrypt.compare(password, user.password))) {
-            const { password, ...result } = user;
-            return this.jwtService.sign(result);
-        }
-        throw new Error('Invalid credentials');
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) throw new Error('Invalid credentials');
+
+        const { password: _, ...result } = user;
+        return result;
     }
 
-    async createUser(createUserDto: CreateUserDto) {
+    login(user: UserDto) {
+        return {
+            access_token: this.jwtService.sign(user),
+        };
+    }
+
+    async createUser(createUserDto: CreateUserDto, req: Request) {
 
         const newUser: User = await this.userService.createUser(createUserDto);
         const { password, ...result } = newUser;
+        req.user = result;
         const token = this.jwtService.sign(result);
         return { token };
     }
@@ -46,10 +53,15 @@ export class AuthService {
             };
         }
         const { password: _, ...result } = user;
-        return {
-            ...result,
-            token: this.jwtService.sign(result)
-        };
+        return result;
+    }
+
+    verifyToken(token: string) {
+        try {
+            return this.jwtService.verify(token);
+        } catch (e) {
+            return null;
+        }
     }
 
 }

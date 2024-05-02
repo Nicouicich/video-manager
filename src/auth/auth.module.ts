@@ -35,6 +35,7 @@ import { SessionSerializer } from './serializer/session.serializer';
     JwtStrategy,
     GoogleStrategy,
     SessionSerializer
-  ]
+  ],
+  exports: [AuthService]
 })
 export class AuthModule {}

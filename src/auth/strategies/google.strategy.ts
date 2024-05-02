@@ -31,16 +31,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         accessToken: string,
         refreshToken: string,
         profile: Profile,
-        // done: VerifyCallback,
+        done: (error: any, user?: any) => void,
     ): Promise<any> {
         try {
             const { emails, displayName } = profile;
             const email = emails[0].value;
             const userData: UserDto = await this.authService.validateGoogleUser({ email, displayName });
-            // done(null, user);
-            return userData;
+            request.user = userData;
+            done(null, userData);
+            // return userData;
         } catch (error) {
-            // done(error, false);
+            done(error, false);
         }
     }
 }

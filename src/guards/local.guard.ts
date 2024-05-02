@@ -4,7 +4,13 @@ import { Observable } from "rxjs";
 
 export class LocalGuard extends AuthGuard('local') {
     canActivate(context: ExecutionContext):
-        boolean | Promise<boolean> | Observable<boolean>{
+        boolean | Promise<boolean> | Observable<boolean> {
         return super.canActivate(context);
+    }
+
+    handleRequest(err, user, info, context: ExecutionContext) {
+        // Puedes agregar el usuario al objeto request aquí
+        context.switchToHttp().getRequest().user = user;
+        return super.handleRequest(err, user, info, context);
     }
 }

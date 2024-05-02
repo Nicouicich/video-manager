@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EmailAlreadyExistsException, UsernameAlreadyExistsException } from 'libs/errors/duplicated-user.error';
@@ -50,5 +50,8 @@ export class UserService {
         }
     }
 
+    async addVideosToUser(userId: Types.ObjectId, videoIds: Types.ObjectId[]) {
+        await this.userModel.updateOne({ _id: userId }, { $push: { videos: { $each: videoIds } } });
+    }
 }
 
