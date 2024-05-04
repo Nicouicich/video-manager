@@ -22,7 +22,6 @@ export class VideoManagerController {
     @Get(':id')
     async getVideo(@Param('id') id: string) {
         return await this.videoManagerService.getVideoById(id);
-
     }
 
 }

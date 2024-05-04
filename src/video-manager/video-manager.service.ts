@@ -47,11 +47,11 @@ export class VideoManagerService {
         return await new this.videoModel(video).save();
     }
 
-    async getVideoById(id: string): Promise<string> {
+    async getVideoById(id: string): Promise<{ url: string; }> {
         const videoDb = await this.videoModel.findOne({ _id: id }).lean();
         if (!videoDb) return null;
         const fileName = videoDb.title.replace(/\s/g, '%20');
-        return `${this.configService.getOrThrow('AWS_CDN_URL')}${fileName}`;
+        return { url: `${this.configService.getOrThrow('AWS_CDN_URL')}${fileName}` };
     }
 
 }
