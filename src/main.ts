@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { ConfigService } from '@nestjs/config';
-
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +20,10 @@ async function bootstrap() {
       }
     })
   );
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
   app.use(passport.initialize());
   app.use(passport.session());
   const config = new DocumentBuilder()
@@ -30,6 +34,8 @@ async function bootstrap() {
     .addTag('User')
     .addTag('Videos')
     .build();
+  app.use(bodyParser.urlencoded({ extended: true }));
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
   await app.listen(3001);

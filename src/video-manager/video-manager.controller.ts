@@ -4,24 +4,32 @@ import { Request, Response } from 'express';
 import { UserDto } from 'src/user/dto/user.dto';
 import { VideoManagerService } from './video-manager.service';
 import { VideoUploaderGuard } from 'src/guards/video-uploader.guard';
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
 
 
 @Controller('video')
 export class VideoManagerController {
-    constructor (private readonly videoManagerService: VideoManagerService) {}
+	constructor(private readonly videoManagerService: VideoManagerService) {}
 
-    @Post()
-    @UseGuards(VideoUploaderGuard)
-    @UseInterceptors(FilesInterceptor('files'))
-    async uploadVideo(@UploadedFiles() files: Array<Express.Multer.File>,
-        @Req() req: Request
-    ) {
-        await this.videoManagerService.upload(files, req.user as UserDto);
-    }
+	@Post()
+	@UseGuards(VideoUploaderGuard)
+	@UseInterceptors(FilesInterceptor('files'))
+	async uploadVideo(@UploadedFiles() files: Array<Express.Multer.File>,
+		@Req() req: Request
+	) {
+		await this.videoManagerService.upload(files, req.user as UserDto);
+	}
 
-    @Get(':id')
-    async getVideo(@Param('id') id: string) {
-        return await this.videoManagerService.getVideoById(id);
-    }
+	@Get(':title')
+	@UseGuards(JwtAuthGuard)
+	async getVideo(@Param('title') title: string) {
+		return await this.videoManagerService.getVideoByTitle(title);
+	}
+
+	@Get('')
+	@UseGuards(JwtAuthGuard)
+	async getAllVideos() {
+		return await this.videoManagerService.getAllVideos();
+	}
 
 }

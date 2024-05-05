@@ -13,7 +13,7 @@ import { UserDto } from 'src/user/dto/user.dto';
 @Controller('auth')
 export class AuthController {
 
-    constructor (
+    constructor(
         private readonly authService: AuthService,
     ) {}
 
@@ -23,11 +23,15 @@ export class AuthController {
     login(@Req() req: Request, @Res() res: Response) {
         const token = this.authService.login(req.user as UserDto);
         res.setHeader('Authorization', `Bearer ${token.access_token}`);
-        console.log(token.access_token)
-        res.json(req.user);
-        // return req.user;
+        res.cookie('jwt', token.access_token, {
+            httpOnly: true,
+            // Deberías usar 'secure: true' en producción para enviar la cookie sólo sobre HTTPS
+            secure: false,
+            // sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 semana
+        });
+        res.json({ user: req.user, token: token.access_token });
     }
-
 
     @Post('logout')
     @UseGuards(JwtAuthGuard)

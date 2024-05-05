@@ -9,7 +9,6 @@ export class LocalGuard extends AuthGuard('local') {
     }
 
     handleRequest(err, user, info, context: ExecutionContext) {
-        // Puedes agregar el usuario al objeto request aquí
         context.switchToHttp().getRequest().user = user;
         return super.handleRequest(err, user, info, context);
     }

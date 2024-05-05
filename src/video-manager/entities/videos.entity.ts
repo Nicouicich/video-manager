@@ -19,13 +19,16 @@ export class Video {
     size: number;
     @Prop()
     mimetype: string;
+    @Prop()
+    duration: number;
 
-    constructor (title: string, description: string, userId: Types.ObjectId, size: number, mimetype: string) {
+    constructor(title: string, description: string, userId: Types.ObjectId, size: number, mimetype: string, duration: number) {
         this.title = title;
         this.description = description;
         this.userId = userId;
         this.size = size;
         this.mimetype = mimetype;
+        this.duration = duration;
     }
 }
 
