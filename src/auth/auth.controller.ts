@@ -9,6 +9,8 @@ import { LocalGuard } from '../guards/local.guard';
 import { AuthService } from './auth.service';
 import { AuthPayloadDto } from './dto/auth.dto';
 import { UserDto } from 'src/user/dto/user.dto';
+import { User } from 'src/user/entities/user.entity';
+import { UnauthorizedExceptionInterceptor } from 'libs/interceptors/invalid-credentials.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +21,7 @@ export class AuthController {
 
     @Post('login')
     @UseGuards(LocalGuard)
+    @UseInterceptors(UnauthorizedExceptionInterceptor)
     @ApiProperty({ type: AuthPayloadDto })
     login(@Req() req: Request, @Res() res: Response) {
         const token = this.authService.login(req.user as UserDto);
@@ -43,28 +46,45 @@ export class AuthController {
 
     @ApiCreatedResponse({ description: 'The user has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Bad request.' })
-    @Post('create')
+    @Post('register')
     @ApiOperation({ summary: 'Create a new user' })
     @UseInterceptors(UsernameAlreadyExistsInterceptor)
     @UseInterceptors(EmailAlreadyExistsInterceptor)
-    createUser(@Body() createUserDto: CreateUserDto,
-        @Req() req: Request
+    async createUser(@Body() createUserDto: CreateUserDto,
+        @Req() req: Request,
+        @Res() res: Response
     ) {
-        return this.authService.createUser(createUserDto, req);
+        const { token } = await this.authService.createUser(createUserDto, req);
+
+        res.setHeader('Authorization', `Bearer ${token}`);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            secure: false,
+            // sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 semana
+        });
+        res.json({ user: req.user, token: token });
     }
 
     @Get('google/login')
     @UseGuards(GoogleAuthGuard)
-    handleGoogleLogin() {
-        return { msg: 'Google Auth' };
-        // return this.authService.googleLogin();
-    }
+    handleGoogleLogin() {}
 
     @Get('google/redirect')
     @UseGuards(GoogleAuthGuard)
-    googleLoginRedirect(@Req() req: Request) {
-        // console.log(req.user);
-        return req.user;
-        // return this.authService.googleLoginRedirect(req);
+    async googleLoginRedirect(
+        @Req() req: Request,
+        @Res() res: Response
+    ) {
+        const { token } = this.authService.createToken(req.user as User);
+        res.setHeader('Authorization', `Bearer ${token}`);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            secure: false,
+            // sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 semana
+        });
+        // res.json({ user: req.user, token: token });
+        res.redirect(`http://localhost:4000/login?token=${token}`);
     }
 }

@@ -1,10 +1,11 @@
-import { Controller, Get, NotFoundException, Param, Post, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { UserDto } from 'src/user/dto/user.dto';
 import { VideoManagerService } from './video-manager.service';
 import { VideoUploaderGuard } from 'src/guards/video-uploader.guard';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { VideoDto } from './dto/video.dto';
 
 
 @Controller('video')
@@ -31,5 +32,24 @@ export class VideoManagerController {
 	async getAllVideos() {
 		return await this.videoManagerService.getAllVideos();
 	}
+
+	@Delete(':id')
+	@UseGuards(JwtAuthGuard)
+	async deleteVideo(@Param('id') id: string,
+		@Req() req: Request
+	) {
+		return await this.videoManagerService.deleteVideo(id, req.user as UserDto);
+	}
+
+	@Patch(':id')
+	@UseGuards(JwtAuthGuard)
+	async updateVideo(
+		@Param('id') id: string,
+		@Body() title: string,
+		@Req() req: Request
+	) {
+		return await this.videoManagerService.updateVideo(id, title, req.user as UserDto);
+	}
+
 
 }

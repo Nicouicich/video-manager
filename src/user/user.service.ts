@@ -4,10 +4,11 @@ import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EmailAlreadyExistsException, UsernameAlreadyExistsException } from 'libs/errors/duplicated-user.error';
+import { GeneralUserDto } from './dto/general-users.dto';
 
 @Injectable()
 export class UserService {
-    constructor (
+    constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
     ) {}
 
@@ -46,12 +47,20 @@ export class UserService {
 
             if (error?.code === 11000 && error?.keyPattern?.email === 1)
                 throw new EmailAlreadyExistsException(createUser.email);
-            console.log(error);
         }
     }
 
     async addVideosToUser(userId: Types.ObjectId, videoIds: Types.ObjectId[]) {
         await this.userModel.updateOne({ _id: userId }, { $push: { videos: { $each: videoIds } } });
+    }
+
+    async getTenUsers(): Promise<GeneralUserDto[]> {
+        const users = await this.userModel.find().limit(10).lean();
+        return users.map(user => new GeneralUserDto(user));
+    }
+
+    async removeVideoFromUser(userId: Types.ObjectId, videoId: Types.ObjectId) {
+        await this.userModel.updateOne({ _id: userId }, { $pull: { videos: videoId } });
     }
 }
 

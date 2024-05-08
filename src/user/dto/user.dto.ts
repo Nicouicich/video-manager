@@ -12,5 +12,7 @@ export class UserDto {
     admin: boolean;
     @ApiProperty({ type: Array })
     videos: mongoose.Types.ObjectId[];
+    @ApiProperty({ type: String })
+    profileImg: string;
 }
 

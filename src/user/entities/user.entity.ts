@@ -23,6 +23,9 @@ export class User {
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }], default: [] })
     videos: mongoose.Types.ObjectId[];
+
+    @Prop({})
+    profileImg: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
