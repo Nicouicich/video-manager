@@ -18,7 +18,7 @@ export class VideoManagerController {
 	async uploadVideo(@UploadedFiles() files: Array<Express.Multer.File>,
 		@Req() req: Request
 	) {
-		await this.videoManagerService.upload(files, req.user as UserDto);
+		return await this.videoManagerService.upload(files, req.user as UserDto);
 	}
 
 	@Get(':title')

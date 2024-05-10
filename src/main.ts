@@ -5,6 +5,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import { ConfigService } from '@nestjs/config';
 import * as bodyParser from 'body-parser';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,9 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'http://localhost:4000', `https://video-player.bytecatalyst.com.ar`],
     credentials: true,
   });
+  app.use(express.json({ limit: '200mb' }));
+  app.use(express.urlencoded({ limit: '200mb', extended: true }));
+
   app.use(passport.initialize());
   app.use(passport.session());
   const config = new DocumentBuilder()
