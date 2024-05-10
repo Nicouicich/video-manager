@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { ConfigService } from '@nestjs/config';
-import bodyParser from 'body-parser';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +20,8 @@ async function bootstrap() {
       },
     }),
   );
-  app.use(bodyParser.json({ limit: '512mb' }));
-  app.use(bodyParser.urlencoded({ limit: '512mb', extended: true }));
+  app.use(express.json({ limit: '512mb' }));
+  app.use(express.urlencoded({ limit: '512mb', extended: true }));
 
   app.use(passport.initialize());
   app.use(passport.session());
