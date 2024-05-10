@@ -16,12 +16,12 @@ async function bootstrap() {
       saveUninitialized: false,
       resave: false,
       cookie: {
-        maxAge: 60000
-      }
-    })
+        maxAge: 60000,
+      },
+    }),
   );
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:4000'],
+    origin: ['http://localhost:3000', 'http://localhost:4000', `https://video-player.bytecatalyst.com.ar`],
     credentials: true,
   });
   app.use(passport.initialize());
