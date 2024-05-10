@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { ConfigService } from '@nestjs/config';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +20,8 @@ async function bootstrap() {
       },
     }),
   );
-  app.use(bodyParser.json({ limit: '200mb' }));
-  app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
+  app.use(bodyParser.json({ limit: '512mb' }));
+  app.use(bodyParser.urlencoded({ limit: '512mb', extended: true }));
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -35,7 +35,12 @@ async function bootstrap() {
     .build();
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:4000', `https://video-player.bytecatalyst.com.ar`],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:4000',
+      'https://video-player.bytecatalyst.com.ar',
+      'video-player.bytecatalyst.com.ar',
+    ],
     credentials: true,
   });
   const document = SwaggerModule.createDocument(app, config);
